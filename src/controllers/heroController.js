@@ -1,4 +1,5 @@
 const Hero = require("../models/Hero");
+const cloudinary = require("../config/cloudinary");
 
 /**
  * @desc   Get Hero Section
@@ -25,51 +26,72 @@ exports.getHero = async (req, res) => {
  * @desc   Create or Update Hero Section
  * @route  PUT /api/hero
  */
+
 exports.updateHero = async (req, res) => {
   try {
-    const { type, videoUrl, images } = req.body;
+    const { type } = req.body;
 
-    // Basic validation
-    if (!type || (type !== "video" && type !== "image")) {
-      return res.status(400).json({ message: "Invalid type" });
-    }
-
-    if (type === "video") {
-      if (!videoUrl) {
-        return res.status(400).json({ message: "Video URL required" });
-      }
+    if (!type) {
+      return res.status(400).json({ message: "Type required" });
     }
 
     if (type === "image") {
-      if (!images || !Array.isArray(images) || images.length === 0) {
-        return res.status(400).json({ message: "At least one image required" });
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "Images required" });
       }
 
-      if (images.length > 10) {
-        return res.status(400).json({ message: "Max 10 images allowed" });
-      }
-    }
-
-    let hero = await Hero.findOne();
-
-    if (hero) {
-      hero.type = type;
-      hero.videoUrl = type === "video" ? videoUrl : "";
-      hero.images = type === "image" ? images : [];
-      await hero.save();
-    } else {
-      hero = await Hero.create({
-        type,
-        videoUrl: type === "video" ? videoUrl : "",
-        images: type === "image" ? images : [],
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { resource_type: "image" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            },
+          );
+          stream.end(file.buffer);
+        });
       });
+
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      const hero = await Hero.findOneAndUpdate(
+        {},
+        { type: "image", images: uploadedImages },
+        { returnDocument: "after", upsert: true },
+      );
+
+      return res.json({ message: "Updated", hero });
     }
 
-    res.status(200).json({
-      message: "Hero updated successfully",
-      hero,
-    });
+    if (type === "video") {
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ message: "Video required" });
+      }
+
+      const videoUrl = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "video" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result.secure_url);
+          },
+        );
+        stream.end(file.buffer);
+      });
+
+      const hero = await Hero.findOneAndUpdate(
+        {},
+        { type: "video", videoUrl, images: [] },
+        { returnDocument: "after", upsert: true },
+      );
+
+      return res.json({ message: "Updated", hero });
+    }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
