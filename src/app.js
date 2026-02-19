@@ -6,6 +6,10 @@ const heroRoutes = require("./routes/heroRoutes");
 const securedPropertyRoutes = require("./routes/securedPropertyRoutes");
 const propertyShowcaseRoutes = require("./routes/propertyShowcaseRoutes");
 const discoverVideoRoutes = require("./routes/discoverVideoRoutes");
+const teamRoutes = require("./routes/teamRoutes");
+const textTestimonialRoutes = require("./routes/textTestimonialRoutes");
+const videoTestimonialRoutes = require("./routes/videoTestimonialRoutes");
+
 
 
 
@@ -36,6 +40,10 @@ app.use("/api/hero", heroRoutes);
 app.use("/api/secured-properties", securedPropertyRoutes);
 app.use("/api/property-showcase", propertyShowcaseRoutes);
 app.use("/api/discover-video", discoverVideoRoutes);
+app.use("/api/team", teamRoutes);
+app.use("/api/text-testimonials", textTestimonialRoutes);
+app.use("/api/video-testimonials", videoTestimonialRoutes);
+
 
 
 module.exports = app;
