@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const heroRoutes = require("./routes/heroRoutes");
 const securedPropertyRoutes = require("./routes/securedPropertyRoutes");
+const propertyShowcaseRoutes = require("./routes/propertyShowcaseRoutes");
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/hero", heroRoutes);
 app.use("/api/secured-properties", securedPropertyRoutes);
+app.use("/api/property-showcase", propertyShowcaseRoutes);
 
 
 module.exports = app;
