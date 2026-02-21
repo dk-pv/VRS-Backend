@@ -4,16 +4,13 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const heroRoutes = require("./routes/heroRoutes");
 const securedPropertyRoutes = require("./routes/securedPropertyRoutes");
-const propertyShowcaseRoutes = require("./routes/propertyShowcaseRoutes");
+const webinarRoutes = require("./routes/webinarRoutes");
 const discoverVideoRoutes = require("./routes/discoverVideoRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const textTestimonialRoutes = require("./routes/textTestimonialRoutes");
 const videoTestimonialRoutes = require("./routes/videoTestimonialRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const blogRoutes = require("./routes/blogRoutes");
-
-
-
 
 const app = express();
 
@@ -32,7 +29,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -40,7 +37,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/hero", heroRoutes);
 app.use("/api/secured-properties", securedPropertyRoutes);
-app.use("/api/property-showcase", propertyShowcaseRoutes);
+app.use("/api/webinars", webinarRoutes);
 app.use("/api/discover-video", discoverVideoRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/text-testimonials", textTestimonialRoutes);
