@@ -6,7 +6,36 @@ const securedPropertySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    image: {
+
+    // Cover image (card only)
+    coverImage: {
+      type: String,
+      required: true,
+    },
+
+    // Gallery images (modal slider)
+    galleryImages: [
+      {
+        type: String,
+      },
+    ],
+
+    description: {
+      type: String,
+      required: true,
+    },
+
+    securedPrice: {
+      type: String,
+      required: true,
+    },
+
+    marketPrice: {
+      type: String,
+      required: true,
+    },
+
+    currentPrice: {
       type: String,
       required: true,
     },
@@ -14,4 +43,7 @@ const securedPropertySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("SecuredProperty", securedPropertySchema);
+module.exports = mongoose.model(
+  "SecuredProperty",
+  securedPropertySchema
+);

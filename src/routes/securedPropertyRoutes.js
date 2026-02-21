@@ -1,20 +1,31 @@
 const express = require("express");
 const router = express.Router();
+
 const controller = require("../controllers/securedPropertyController");
 const upload = require("../middleware/upload");
 
+// GET ALL
+router.get("/", controller.getAllProperties);
 
-
-// Admin Routes
 router.post(
   "/",
-  upload.single("image"), // important: same field name
-  controller.createProperty
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "galleryImages", maxCount: 10 },
+  ]),
+  controller.createProperty,
 );
-router.put("/:id", controller.updateProperty);
-router.delete("/:id", controller.deleteProperty);
 
-// Public Route
-router.get("/", controller.getAllProperties);
+router.put(
+  "/:id",
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "galleryImages", maxCount: 10 },
+  ]),
+  controller.updateProperty,
+);
+
+// DELETE
+router.delete("/:id", controller.deleteProperty);
 
 module.exports = router;
