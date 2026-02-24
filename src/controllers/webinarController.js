@@ -17,32 +17,37 @@ exports.createWebinar = async (req, res) => {
 /* ========================= */
 exports.getActiveWebinar = async (req, res) => {
   try {
-    const webinar = await Webinar.findOne({ isActive: true }).sort({
+    const webinars = await Webinar.find({ isActive: true }).sort({
       createdAt: -1,
     });
 
-    if (!webinar) {
-      return res.status(404).json({ message: "No webinar found" });
+    if (!webinars.length) {
+      return res.status(404).json({ message: "No webinars found" });
     }
 
     const now = new Date();
-    const startTime = new Date(webinar.date);
-    const endTime = new Date(
-      startTime.getTime() + webinar.durationMinutes * 60000
-    );
 
-    let status = "upcoming";
+    const updatedWebinars = webinars.map((webinar) => {
+      const startTime = new Date(webinar.date);
+      const endTime = new Date(
+        startTime.getTime() + webinar.durationMinutes * 60000
+      );
 
-    if (now >= startTime && now <= endTime) {
-      status = "live";
-    } else if (now > endTime) {
-      status = "ended";
-    }
+      let status = "upcoming";
 
-    res.json({
-      ...webinar.toObject(),
-      status,
+      if (now >= startTime && now <= endTime) {
+        status = "live";
+      } else if (now > endTime) {
+        status = "ended";
+      }
+
+      return {
+        ...webinar.toObject(),
+        status,
+      };
     });
+
+    res.json(updatedWebinars);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
