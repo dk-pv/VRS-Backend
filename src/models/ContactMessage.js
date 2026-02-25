@@ -5,13 +5,32 @@ const contactMessageSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     email: {
       type: String,
       required: true,
+      trim: true,
     },
-    message: {
+    phone: {
       type: String,
+      required: true,
+      trim: true,
+    },
+    australiaDuration: {
+      type: String,
+      trim: true,
+    },
+    mortgageYears: {
+      type: String,
+      trim: true,
+    },
+    baPreference: {
+      type: String,
+      trim: true,
+    },
+    agree: {
+      type: Boolean,
       required: true,
     },
     isRead: {
@@ -22,7 +41,4 @@ const contactMessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model(
-  "ContactMessage",
-  contactMessageSchema
-);
+module.exports = mongoose.model("ContactMessage", contactMessageSchema);

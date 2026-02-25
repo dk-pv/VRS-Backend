@@ -1,17 +1,45 @@
 const ContactMessage = require("../models/ContactMessage");
 
-// CREATE (User Side)
+// CREATE
 exports.createMessage = async (req, res) => {
   try {
-    const { name, email, message } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      australiaDuration,
+      mortgageYears,
+      baPreference,
+      agree,
+    } = req.body;
+
+    // Basic validation
+    if (!name || !email || !phone) {
+      return res.status(400).json({
+        message: "Name, Email and Phone are required",
+      });
+    }
+
+    if (!agree) {
+      return res.status(400).json({
+        message: "You must agree to the policy",
+      });
+    }
 
     const newMessage = await ContactMessage.create({
       name,
       email,
-      message,
+      phone,
+      australiaDuration,
+      mortgageYears,
+      baPreference,
+      agree,
     });
 
-    res.status(201).json(newMessage);
+    res.status(201).json({
+      message: "Message submitted successfully",
+      data: newMessage,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -40,13 +68,13 @@ exports.deleteMessage = async (req, res) => {
   }
 };
 
-// MARK AS READ
+
 exports.markAsRead = async (req, res) => {
   try {
     const message = await ContactMessage.findByIdAndUpdate(
       req.params.id,
       { isRead: true },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     res.json(message);
