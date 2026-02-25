@@ -12,47 +12,24 @@ exports.createWebinar = async (req, res) => {
   }
 };
 
+
 /* ========================= */
-/* GET ACTIVE WEBINAR */
+/* GET ALL WEBINARS (LIMIT 3) */
 /* ========================= */
-exports.getActiveWebinar = async (req, res) => {
+exports.getWebinars = async (req, res) => {
   try {
-    const webinars = await Webinar.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
+    const webinars = await Webinar.find()
+      .sort({ createdAt: -1 }) // latest first
 
     if (!webinars.length) {
       return res.status(404).json({ message: "No webinars found" });
     }
 
-    const now = new Date();
-
-    const updatedWebinars = webinars.map((webinar) => {
-      const startTime = new Date(webinar.date);
-      const endTime = new Date(
-        startTime.getTime() + webinar.durationMinutes * 60000
-      );
-
-      let status = "upcoming";
-
-      if (now >= startTime && now <= endTime) {
-        status = "live";
-      } else if (now > endTime) {
-        status = "ended";
-      }
-
-      return {
-        ...webinar.toObject(),
-        status,
-      };
-    });
-
-    res.json(updatedWebinars);
+    res.json(webinars);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 /* ========================= */
 /* UPDATE WEBINAR */
 /* ========================= */

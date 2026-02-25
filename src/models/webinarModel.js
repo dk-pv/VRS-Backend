@@ -6,27 +6,35 @@ const webinarSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     description: {
       type: String,
     },
-    date: {
-      type: Date,
+
+    // ✅ Day (Monday, Tuesday, etc.)
+    day: {
+      type: String,
       required: true,
     },
+
+    // ✅ Time (24hr format recommended: "19:30")
+    time: {
+      type: String,
+      required: true,
+    },
+
     durationMinutes: {
       type: Number,
       default: 60,
     },
+
     meetLink: {
       type: String,
       required: true,
     },
+
     recordingLink: {
       type: String,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
     },
   },
   { timestamps: true }

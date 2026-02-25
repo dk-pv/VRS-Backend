@@ -3,7 +3,7 @@ const router = express.Router();
 const webinarController = require("../controllers/webinarController");
 
 router.post("/", webinarController.createWebinar);
-router.get("/active", webinarController.getActiveWebinar);
+router.get("/", webinarController.getWebinars);
 router.put("/:id", webinarController.updateWebinar);
 router.delete("/:id", webinarController.deleteWebinar);
 
