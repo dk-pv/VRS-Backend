@@ -10,10 +10,6 @@ const videoTestimonialSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    thumbnail: {
-      type: String,
-      required: true,
-    },
     youtubeLink: {
       type: String,
       required: true,
