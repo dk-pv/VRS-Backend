@@ -6,5 +6,8 @@ const upload = require("../middleware/upload");
 router.get("/", controller.getBlogs);
 router.get("/:slug", controller.getBlogBySlug);
 router.post("/", upload.single("image"), controller.createBlog);
+router.delete("/:id", controller.deleteBlog);
+router.put("/:id", upload.single("image"), controller.updateBlog);
+
 
 module.exports = router;
