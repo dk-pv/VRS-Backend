@@ -2,28 +2,28 @@ const Hero = require("../models/Hero");
 const cloudinary = require("../config/cloudinary");
 
 /**
- * @desc   Get Hero Section
- * @route  GET /api/hero
+ * GET HERO
  */
 exports.getHero = async (req, res) => {
   try {
-    const hero = await Hero.findOne();
+    let hero = await Hero.findOne();
 
     if (!hero) {
-      return res.status(200).json({
+      hero = await Hero.create({
         type: "image",
         images: [],
       });
     }
 
-    res.status(200).json(hero);
-  } catch (error) {
+    res.json(hero);
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
-
-
+/**
+ * UPDATE HERO
+ */
 exports.updateHero = async (req, res) => {
   try {
     const { type } = req.body;
@@ -32,39 +32,58 @@ exports.updateHero = async (req, res) => {
       return res.status(400).json({ message: "Type required" });
     }
 
-    // ================= IMAGE UPLOAD =================
-    if (type === "image") {
-      const files = req.files?.images;
+    let hero = await Hero.findOne();
 
-      if (!files || files.length === 0) {
-        return res.status(400).json({ message: "Images required" });
-      }
-
-      const uploadPromises = files.map((file) => {
-        return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { resource_type: "image", folder: "hero" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result.secure_url);
-            }
-          );
-          stream.end(file.buffer);
-        });
-      });
-
-      const uploadedImages = await Promise.all(uploadPromises);
-
-      const hero = await Hero.findOneAndUpdate(
-        {},
-        { type: "image", images: uploadedImages, videoUrl: "" },
-        { new: true, upsert: true }
-      );
-
-      return res.json({ message: "Images uploaded", hero });
+    if (!hero) {
+      hero = new Hero({ type: "image", images: [] });
     }
 
-    // ================= VIDEO UPLOAD =================
+    // ================= IMAGE MODE =================
+    if (type === "image") {
+      const files = req.files?.images || [];
+
+      if (files.length === 0 && hero.images.length === 0) {
+        return res.status(400).json({ message: "At least 1 image required" });
+      }
+
+      // Upload new images
+      const uploadedImages = await Promise.all(
+        files.map((file) => {
+          return new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              { folder: "hero", resource_type: "image" },
+              (error, result) => {
+                if (error) reject(error);
+                else {
+                  resolve({
+                    url: result.secure_url,
+                    public_id: result.public_id,
+                  });
+                }
+              }
+            );
+            stream.end(file.buffer);
+          });
+        })
+      );
+
+      // append images
+      const totalImages = [...hero.images, ...uploadedImages];
+
+      if (totalImages.length > 10) {
+        return res.status(400).json({ message: "Max 10 images allowed" });
+      }
+
+      hero.type = "image";
+      hero.images = totalImages;
+      hero.video = undefined;
+
+      await hero.save();
+
+      return res.json({ message: "Images updated", hero });
+    }
+
+    // ================= VIDEO MODE =================
     if (type === "video") {
       const file = req.files?.video?.[0];
 
@@ -72,25 +91,71 @@ exports.updateHero = async (req, res) => {
         return res.status(400).json({ message: "Video required" });
       }
 
-      const videoUrl = await new Promise((resolve, reject) => {
+      // delete old video
+      if (hero.video?.public_id) {
+        await cloudinary.uploader.destroy(hero.video.public_id, {
+          resource_type: "video",
+        });
+      }
+
+      const video = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "video", folder: "hero" },
+          { folder: "hero", resource_type: "video" },
           (error, result) => {
             if (error) reject(error);
-            else resolve(result.secure_url);
+            else {
+              resolve({
+                url: result.secure_url,
+                public_id: result.public_id,
+              });
+            }
           }
         );
         stream.end(file.buffer);
       });
 
-      const hero = await Hero.findOneAndUpdate(
-        {},
-        { type: "video", videoUrl, images: [] },
-        { new: true, upsert: true }
-      );
+      hero.type = "video";
+      hero.video = video;
+      hero.images = [];
 
-      return res.json({ message: "Video uploaded", hero });
+      await hero.save();
+
+      return res.json({ message: "Video updated", hero });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * DELETE IMAGE
+ */
+exports.deleteImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const hero = await Hero.findOne();
+
+    if (!hero) {
+      return res.status(404).json({ message: "Hero not found" });
+    }
+
+    const image = hero.images.id(id);
+
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    // delete from cloudinary
+    await cloudinary.uploader.destroy(image.public_id);
+
+    // remove from DB
+    image.deleteOne();
+
+    await hero.save();
+
+    res.json({ message: "Image deleted", hero });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

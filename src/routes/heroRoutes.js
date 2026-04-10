@@ -16,4 +16,10 @@ router.put(
   heroController.updateHero
 );
 
+router.delete(
+  "/image/:id",
+  authMiddleware,
+  heroController.deleteImage
+);
+
 module.exports = router;

@@ -7,11 +7,20 @@ const heroSchema = new mongoose.Schema(
       enum: ["video", "image"],
       required: true,
     },
-    videoUrl: String,
-    images: [String],
+
+    video: {
+      url: String,
+      public_id: String,
+    },
+
+    images: [
+      {
+        url: String,
+        public_id: String,
+      },
+    ],
   },
   { timestamps: true }
 );
-
 
 module.exports = mongoose.model("Hero", heroSchema);
