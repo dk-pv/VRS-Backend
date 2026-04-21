@@ -66,12 +66,10 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const app = express();
 
 // Allow all origins
-app.use(
-  cors({
-    origin: "*",
-    credentials: true,
-  })
-);
+app.use(cors());
+app.options("*", cors());
+
+
 
 app.use(express.json());
 
