@@ -65,6 +65,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
+app.use(cors(corsConfig))
 
 const corsConfig = {
     origin:"*",
